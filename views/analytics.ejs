@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-group label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .input-group input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .input-group button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #analyticsResult {
+            margin-top: 20px;
+        }
+
+        #analyticsResult table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #analyticsResult th,
+        #analyticsResult td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        #analyticsResult th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Analytics</h1>
+        <div class="input-group">
+            <label for="shortIdInput">Enter Short ID:</label>
+            <input type="text" id="shortIdInput" name="shortId" placeholder="Enter Short ID">
+            <button onclick="getAnalytics()">Get Analytics</button>
+        </div>
+        <div id="analyticsResult">
+            <!-- Analytics data will be displayed here -->
+        </div>
+    </div>
+
+    <script>
+        function getAnalytics() {
+            const shortId = document.getElementById("shortIdInput").value;
+
+            // Check if the short ID is empty
+            if (!shortId) {
+                console.error("Short ID is empty");
+                return;
+            }
+
+            // Fetch analytics data from the backend
+            fetch(`/analytics/${shortId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const analyticsResult = document.getElementById("analyticsResult");
+                    analyticsResult.innerHTML = "";
+
+                    // Check if analytics data exists
+                    if (data) {
+                        // Display total clicks
+                        const totalClicks = document.createElement("p");
+                        totalClicks.innerText = `Total Clicks: ${data.totalClicks}`;
+                        analyticsResult.appendChild(totalClicks);
+
+                        // Create a table for displaying visit history
+                        const table = document.createElement("table");
+                        const headerRow = table.insertRow();
+                        const headers = ["Timestamp", "IP Address", "User Agent"];
+                        headers.forEach(headerText => {
+                            const header = document.createElement("th");
+                            header.textContent = headerText;
+                            headerRow.appendChild(header);
+                        });
+
+                        // Populate the table with data
+                        data.analytics.forEach(entry => {
+                            const row = table.insertRow();
+                            Object.values(entry).forEach(value => {
+                                const cell = row.insertCell();
+                                cell.textContent = value;
+                            });
+                        });
+
+                        analyticsResult.appendChild(table);
+                    } else {
+                        // Display error message if no analytics data found
+                        const errorMessage = document.createElement("p");
+                        errorMessage.innerText = "No analytics data found for the specified Short ID";
+                        analyticsResult.appendChild(errorMessage);
+                    }
+                })
+                .catch(error => console.error("Error fetching analytics:", error));
+        }
+    </script>
+</body>
+
+</html>
